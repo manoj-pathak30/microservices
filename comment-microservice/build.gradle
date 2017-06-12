@@ -1,0 +1,88 @@
+buildscript {
+	ext {
+		springBootVersion='1.5.3.RELEASE'
+		jarName='comment-microservice'
+		versionName = '0.0.1'
+		gradleDockerVersion = '1.2'
+	}
+	repositories {
+		jcenter()
+		mavenCentral()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath("se.transmode.gradle:gradle-docker:${gradleDockerVersion}")
+	}
+}
+
+task createWrapper(type: Wrapper) {
+    gradleVersion = '3.5'
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'application'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'docker'
+
+
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = 1.8
+targetCompatibility=1.8
+
+dependencyManagement {
+    imports {
+        mavenBom 'org.springframework.cloud:spring-cloud-dependencies:Dalston.RELEASE'
+    }
+}
+
+repositories {
+	mavenCentral()
+}
+
+group ='manojpathak'
+mainClassName='com.manoj.microservice.comment.CommentServiceApplication'
+
+dependencies {
+	compile('org.springframework.boot:spring-boot-starter-actuator')
+	compile('org.springframework.cloud:spring-cloud-starter-config')
+	compile('org.springframework.boot:spring-boot-starter-web')
+	compile('org.springframework.cloud:spring-cloud-starter-eureka')
+
+	// Spring OAuth2 security
+	compile("org.springframework.boot:spring-boot-starter-security")
+	compile("org.springframework.security.oauth:spring-security-oauth2")
+	compile("org.springframework.security:spring-security-jwt")
+
+	// JPA for persisting user data
+//	compile("org.springframework.boot:spring-boot-starter-data-jpa")
+//	compile("mysql:mysql-connector-java:5.1.30")
+}
+
+
+jar {
+    baseName = "${project.jarName}"
+    version =  "${project.versionName}"
+}
+
+
+run{
+    jvmArgs = ['-Xdebug', '-Xrunjdwp:server=y,transport=dt_socket,address=4100,suspend=n','-Dspring.profiles.active=default']
+}
+
+task buildDocker(type: Docker, dependsOn: build) {
+	push = false
+	applicationName = jar.baseName
+	tagVersion = jar.version
+	dockerfile = file('src/main/docker/Dockerfile')
+	doFirst {
+		copy {
+			from jar
+			into stageDir
+		}
+		copy {
+			from "${project.buildDir}/resources/main/run.sh"
+			into stageDir
+		}
+	}
+}

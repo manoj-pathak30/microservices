@@ -1,0 +1,6 @@
+spring:
+  application:
+      name: task-microservice
+  cloud:
+    config:
+      uri: http://localhost:8888

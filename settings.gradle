@@ -1,0 +1,9 @@
+include 'config-server'
+include 'discovery-server'
+include 'user-microservice'
+include 'oauth-server'
+include 'web-portal'
+include 'api-gateway'
+include 'task-microservice'
+include 'comment-microservice'
+

@@ -1,0 +1,16 @@
+spring:
+  application:
+      name: oauth-server
+  cloud:
+    config:
+      uri: http://localhost:8888
+
+
+
+---
+#spring:
+#  profiles: docker
+#  cloud:
+#     oauth:
+#        uri: http://192.168.59.103:8888
+#
